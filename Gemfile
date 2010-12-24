@@ -1,6 +1,11 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.0.3'
+gem 'validates_timeliness', :git => "git://github.com/adzap/validates_timeliness.git"
+
+group :test do
+  gem 'factory_girl_rails'
+end
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'

@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  start_time: 2010-12-24 14:29:07
+  end_time: 2010-12-24 14:29:07
+  total_time: 1.5
+  paid: false
+
+two:
+  start_time: 2010-12-24 14:29:07
+  end_time: 2010-12-24 14:29:07
+  total_time: 1.5
+  paid: false
