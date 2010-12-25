@@ -1,6 +1,15 @@
 require 'test_helper'
 
 class ShiftTest < ActiveSupport::TestCase
+  
+  setup do
+    Shift.destroy_all
+  end
+  
+  teardown do
+    Shift.destroy_all
+  end
+  
   test "should be invalid without start time" do
     assert !Factory.build(:shift, :start_time => nil).valid?
   end
@@ -17,7 +26,9 @@ class ShiftTest < ActiveSupport::TestCase
   end
   
   test "end_time_present? should return true when end time is present" do
-    act = Factory.build(:full_shift)
+    act = Factory.build(:shift)
     assert_equal act.end_time_present?, true
   end
+  
+  
 end

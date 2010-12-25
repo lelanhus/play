@@ -1,11 +1,13 @@
 class Activity < ActiveRecord::Base
   
+  belongs_to :shift
+  
   scope :paid, where(:paid => true)
   scope :nonpaid, where(:paid => false)
   scope :complete, where("activities.end_time is not null")
   
   validates :start_time, :presence => true
-  validates_time :start_time, :before => :end_time, :if => :end_time_present?
+  validates :start_time, :timeliness => { :before => :end_time, :if => :end_time_present? }
   validates :total_time, :presence => true
   
   before_validation :set_total_time, :if => :needs_total_time?

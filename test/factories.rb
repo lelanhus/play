@@ -1,30 +1,21 @@
 Factory.define :activity do |f|
-  f.start_time Time.now
-end
-
-Factory.define :full_activity, :class => Activity do |f|
+  f.association :shift
   @start = Time.now
-  @end = @start + 5000
+  @end = @start + 3600 * rand()
   f.start_time @start
   f.end_time @end
 end
 
-Factory.define :paid_activity, :class => Activity do |f|
-  @start = Time.now
-  @end = @start + 5000
-  f.start_time @start
-  f.end_time @end
-  f.paid true
-end
-
-# Shift Factories
 Factory.define :shift do |f|
-  f.start_time Time.now
+  @start = Time.now
+  @end = @start + 15000
+  f.start_time @start
+  f.end_time @end
 end
 
-Factory.define :full_shift, :class => Shift do |f|
+Factory.define :extra_activity, :class => Activity do |f|
   @start = Time.now
-  @end = @start + 10000
+  @end = @start + 5000
   f.start_time @start
   f.end_time @end
 end

@@ -2,6 +2,14 @@ require 'test_helper'
 
 class ActivityTest < ActiveSupport::TestCase
   
+  setup do
+    Activity.destroy_all
+  end
+  
+  teardown do
+    Activity.destroy_all
+  end
+  
   test "should be invalid without start time" do
     assert !Factory.build(:activity, :start_time => nil).valid?
   end
@@ -12,18 +20,23 @@ class ActivityTest < ActiveSupport::TestCase
     assert !act.valid?
   end
   
+  test "should be invalid without a shift" do
+    
+  end
+  
   test "end_time_present? should return false when end time is not present" do
     act = Factory.build(:activity, :end_time => nil)
     assert_equal act.end_time_present?, false
   end
   
   test "end_time_present? should return true when end time is present" do
-    act = Factory.build(:full_activity)
+    act = Factory.build(:activity)
     assert_equal act.end_time_present?, true
   end
   
   test "calculate_total_time should calculate the total activty time to the first decimal" do
-    act = Factory.build(:full_activity)
+    act = Factory.build(:activity)
+    act.end_time = act.start_time + 5000
     assert_equal act.calculate_total_time, 3.5
     
     a = Factory.build(:activity)
@@ -34,36 +47,31 @@ class ActivityTest < ActiveSupport::TestCase
   test "paid scope returns paid activities" do
     Activity.delete_all
     3.times do
-      Factory(:paid_activity)
+      Factory(:activity, :paid => true)
     end
-    Factory(:full_activity)
+    Factory(:activity)
     assert_equal Activity.paid.length, 3
   end
   
   test "nonpaid scope returns nonpaid activities" do
     Activity.delete_all
     3.times do
-      Factory(:full_activity)
+      Factory(:activity)
     end
-    Factory(:paid_activity)
+    Factory(:activity, :paid => true)
     assert_equal Activity.nonpaid.length, 3  
   end
   
   test "complete scope returns complete activities" do
     Activity.delete_all
     3.times do
-      Factory(:full_activity)
+      Factory(:activity)
     end
-    Factory(:activity)
+    Factory(:activity, :end_time => :nil)
     assert_equal Activity.complete.length, 3
   end
   
-  private
-  
-  def valid_activity
-    @act = Activity.new
-    @act.start_time = Time.now
-    @act.end_time = @act.start_time + 5000
-  end
+  test "start time should be during the shift" do
 
+  end
 end
