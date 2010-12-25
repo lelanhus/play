@@ -9,17 +9,17 @@ class ActivityTest < ActiveSupport::TestCase
   teardown do
   end
   
-  test "should be invalid without a shift" do
+  test "activity should be invalid without a shift" do
     assert !Factory.build(:activity).valid?
   end
   
-  test "should be invalid without start time" do
+  test "activity should be invalid without start time" do
     act = Factory(:activity, :shift => Factory(:shift))
     act.start_time = nil
     assert !act.valid?
   end
   
-  test "should be invalid if start time is after end time" do
+  test "activity should be invalid if start time is after end time" do
     act = Factory.build(:activity, :shift => Factory(:shift))
     act.end_time = act.start_time - 5000
     assert !act.valid?
@@ -68,8 +68,17 @@ class ActivityTest < ActiveSupport::TestCase
     3.times do
       Factory(:activity, :shift => Factory(:shift))
     end
-    Factory(:activity, :end_time => :nil, :shift => Factory(:shift))
+    Factory(:activity, :end_time => nil, :shift => Factory(:shift, :end_time => nil))
     assert_equal Activity.complete.length, 3
+  end
+  
+  test "incomplete scope returns incomplete activities" do
+    Activity.delete_all
+    3.times do
+      Factory(:activity, :shift => Factory(:shift))
+    end
+    Factory(:activity, :end_time => nil, :shift => Factory(:shift, :end_time => nil))
+    assert_equal Activity.incomplete.length, 1
   end
   
   test "activity should occur during a shift" do
@@ -90,11 +99,13 @@ class ActivityTest < ActiveSupport::TestCase
     act1.end_time = act1.start_time + 100
     act1.save
     
+    # start time is during another activity
     act2 = shift1.activities.build
     act2.start_time = act1.start_time + 50
     act2.end_time = act1.end_time + 50
     assert !act2.valid?
     
+    # end time is during another activity
     act2.start_time = act1.start_time - 50
     act2.end_time = act1.end_time - 50
     assert !act2.valid?
@@ -107,11 +118,21 @@ class ActivityTest < ActiveSupport::TestCase
   end
   
   test "activity should have an end time if the shift is complete" do
-    
+    act = Factory(:activity, :shift => Factory(:shift))
+    act.end_time = nil
+    assert !act.valid?
   end
   
   test "a new activity cannot be started if there are incomplete activities for the shift" do
+    act1 = Factory(:activity, :end_time => nil, :shift => Factory(:shift, :end_time => nil))
+    act2 = act1.shift.activities.build
+    act2.start_time = Time.now
+    assert !act2.valid?
     
+    act1.end_time = Time.now
+    act1.save
+    act2.start_time = Time.now + 10
+    assert act2.valid?
   end
 
 end
