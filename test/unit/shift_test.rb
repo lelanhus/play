@@ -20,14 +20,22 @@ class ShiftTest < ActiveSupport::TestCase
     assert !act.valid?
   end
   
-  test "end_time_present? should return false when end time is not present" do
+  test "has_end_time? should return false when end time is not present" do
     act = Factory.build(:shift, :end_time => nil)
-    assert_equal act.end_time_present?, false
+    assert_equal act.has_end_time?, false
   end
   
-  test "end_time_present? should return true when end time is present" do
+  test "has_end_time? should return true when end time is present" do
     act = Factory.build(:shift)
-    assert_equal act.end_time_present?, true
+    assert_equal act.has_end_time?, true
+  end
+  
+  test "shift should not start if there are incomplete shifts" do
+    
+  end
+  
+  test "shift should not occur during another shift" do
+    
   end
   
   

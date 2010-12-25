@@ -7,39 +7,40 @@ class ActivityTest < ActiveSupport::TestCase
   end
   
   teardown do
-    Activity.destroy_all
+  end
+  
+  test "should be invalid without a shift" do
+    assert !Factory.build(:activity).valid?
   end
   
   test "should be invalid without start time" do
-    assert !Factory.build(:activity, :start_time => nil).valid?
+    act = Factory(:activity, :shift => Factory(:shift))
+    act.start_time = nil
+    assert !act.valid?
   end
   
   test "should be invalid if start time is after end time" do
-    act = Factory.build(:activity)
+    act = Factory.build(:activity, :shift => Factory(:shift))
     act.end_time = act.start_time - 5000
     assert !act.valid?
   end
   
-  test "should be invalid without a shift" do
-    
+  test "has_end_time? should return false when end time is not present" do
+    act = Factory.build(:activity, :end_time => nil, :shift => Factory(:shift))
+    assert_equal act.has_end_time?, false
   end
   
-  test "end_time_present? should return false when end time is not present" do
-    act = Factory.build(:activity, :end_time => nil)
-    assert_equal act.end_time_present?, false
-  end
-  
-  test "end_time_present? should return true when end time is present" do
-    act = Factory.build(:activity)
-    assert_equal act.end_time_present?, true
+  test "has_end_time? should return true when end time is present" do
+    act = Factory.build(:activity, :shift => Factory(:shift))
+    assert_equal act.has_end_time?, true
   end
   
   test "calculate_total_time should calculate the total activty time to the first decimal" do
-    act = Factory.build(:activity)
+    act = Factory.build(:activity, :shift => Factory(:shift))
     act.end_time = act.start_time + 5000
     assert_equal act.calculate_total_time, 3.5
     
-    a = Factory.build(:activity)
+    a = Factory.build(:activity, :shift => Factory(:shift))
     a.end_time = a.start_time + 10000
     assert_equal a.calculate_total_time, 6.9
   end
@@ -47,31 +48,70 @@ class ActivityTest < ActiveSupport::TestCase
   test "paid scope returns paid activities" do
     Activity.delete_all
     3.times do
-      Factory(:activity, :paid => true)
+      Factory(:activity, :paid => true, :shift => Factory(:shift))
     end
-    Factory(:activity)
+    Factory(:activity, :shift => Factory(:shift))
     assert_equal Activity.paid.length, 3
   end
   
   test "nonpaid scope returns nonpaid activities" do
     Activity.delete_all
     3.times do
-      Factory(:activity)
+      Factory(:activity, :shift => Factory(:shift))
     end
-    Factory(:activity, :paid => true)
+    Factory(:activity, :paid => true, :shift => Factory(:shift))
     assert_equal Activity.nonpaid.length, 3  
   end
   
   test "complete scope returns complete activities" do
     Activity.delete_all
     3.times do
-      Factory(:activity)
+      Factory(:activity, :shift => Factory(:shift))
     end
-    Factory(:activity, :end_time => :nil)
+    Factory(:activity, :end_time => :nil, :shift => Factory(:shift))
     assert_equal Activity.complete.length, 3
   end
   
-  test "start time should be during the shift" do
-
+  test "activity should occur during a shift" do
+    act = Factory(:activity, :shift => Factory(:shift))
+    act.start_time = act.shift.start_time - 50
+    assert !act.valid?
+    
+    act.start_time = act.shift.start_time + 55
+    act.end_time = act.shift.end_time + 50
+    assert !act.valid?
   end
+
+  test "activity should not occur during another activity of that shift" do
+    shift1 = Factory(:shift)
+    
+    act1 = shift1.activities.build
+    act1.start_time = shift1.start_time + 100
+    act1.end_time = act1.start_time + 100
+    act1.save
+    
+    act2 = shift1.activities.build
+    act2.start_time = act1.start_time + 50
+    act2.end_time = act1.end_time + 50
+    assert !act2.valid?
+    
+    act2.start_time = act1.start_time - 50
+    act2.end_time = act1.end_time - 50
+    assert !act2.valid?
+    
+    shift2 = Factory(:shift)
+    act = shift2.activities.build
+    act.start_time = shift2.start_time + 100
+    act.end_time = shift2.end_time - 100
+    assert act.valid?
+  end
+  
+  test "activity should have an end time if the shift is complete" do
+    
+  end
+  
+  test "a new activity cannot be started if there are incomplete activities for the shift" do
+    
+  end
+
 end
