@@ -1,5 +1,8 @@
 class Activity < ActiveRecord::Base
   
+  scope :paid, where(:paid => true)
+  scope :nonpaid, where(:paid => false)
+  scope :complete, where("activities.end_time is not null")
   
   validates :start_time, :presence => true
   validates_time :start_time, :before => :end_time, :if => :end_time_present?

@@ -31,7 +31,32 @@ class ActivityTest < ActiveSupport::TestCase
     assert_equal a.calculate_total_time, 6.9
   end
   
-
+  test "paid scope returns paid activities" do
+    Activity.delete_all
+    3.times do
+      Factory(:paid_activity)
+    end
+    Factory(:full_activity)
+    assert_equal Activity.paid.length, 3
+  end
+  
+  test "nonpaid scope returns nonpaid activities" do
+    Activity.delete_all
+    3.times do
+      Factory(:full_activity)
+    end
+    Factory(:paid_activity)
+    assert_equal Activity.nonpaid.length, 3  
+  end
+  
+  test "complete scope returns complete activities" do
+    Activity.delete_all
+    3.times do
+      Factory(:full_activity)
+    end
+    Factory(:activity)
+    assert_equal Activity.complete.length, 3
+  end
   
   private
   

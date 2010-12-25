@@ -1,0 +1,19 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  start_time: 2010-12-24 20:49:29
+  end_time: 2010-12-24 20:49:29
+  paid_hours: 1.5
+  nonpaid_hours: 1.5
+  total_hours: 1.5
+  nonpaid_activities: 1
+  paid_activities: 1
+
+two:
+  start_time: 2010-12-24 20:49:29
+  end_time: 2010-12-24 20:49:29
+  paid_hours: 1.5
+  nonpaid_hours: 1.5
+  total_hours: 1.5
+  nonpaid_activities: 1
+  paid_activities: 1
