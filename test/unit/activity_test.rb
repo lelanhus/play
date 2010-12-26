@@ -7,6 +7,7 @@ class ActivityTest < ActiveSupport::TestCase
   end
   
   teardown do
+    Activity.destroy_all
   end
   
   test "activity should be invalid without a shift" do
@@ -137,4 +138,31 @@ class ActivityTest < ActiveSupport::TestCase
     assert act2.valid?
   end
 
+  test "completing and activity updates shift activities count and hours" do
+    Activity.destroy_all
+    Shift.destroy_all
+    act = Factory(:activity, :shift => Factory(:shift, :end_time => nil))
+    assert_equal act.shift.activities.nonpaid.complete.length, 1
+    assert_equal act.shift.nonpaid_activities, 1
+    
+    assert_equal act.shift.nonpaid_hours, act.total_time
+    assert_equal act.shift.total_hours, act.total_time
+    
+    act2 = Factory(:activity, :paid => true, :shift => act.shift)
+    assert_equal act2.shift.paid_activities, 1
+    assert_equal act2.shift.nonpaid_activities, 1
+    
+    assert_equal act2.shift.nonpaid_hours, act.total_time
+    assert_equal act2.shift.paid_hours, act2.total_time
+    
+    total_time = act.total_time + act2.total_time
+    assert_equal act2.shift.total_hours, total_time
+    
+    shift = act.shift
+    shift.end_time = Time.now + 30000
+    act3 = Factory(:activity, :shift => shift)
+    total_time = act.total_time + act2.total_time + act3.total_time
+    assert_equal act3.shift.nonpaid_hours, total_time
+    assert_equal act3.shift.nonpaid_activities, 2
+  end
 end

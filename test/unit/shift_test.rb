@@ -68,6 +68,26 @@ class ShiftTest < ActiveSupport::TestCase
     s.end_time = shift.start_time - 10
     assert s.valid?
   end
-  
-  
+
+  test "update_activities updates activity counts and hours" do
+    shift = Factory(:shift)
+    3.times do
+      Factory(:activity, :paid => true, :total_time => 3.0, :shift => shift)
+    end
+    
+    shift.update_activities
+    assert_equal shift.paid_activities, 3
+    assert_equal shift.paid_hours, 9.0
+    
+    5.times do
+      Factory(:activity, :total_time => 5.0, :shift => shift)
+    end
+    
+    shift.update_activities
+    assert_equal shift.nonpaid_activities, 5
+    assert_equal shift.nonpaid_hours, 25.0
+    
+    assert_equal shift.total_hours, 34.0
+    
+  end
 end
