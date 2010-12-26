@@ -2,13 +2,17 @@ class Shift < ActiveRecord::Base
   
   has_many :activities
   
-  scope :complete, where("shifts.end_time is not null")
-  scope :incomplete, where("shifts.end_time is null")
+  scope :complete, where("shifts.end_time IS NOT null")
+  scope :incomplete, where("shifts.end_time IS null")
   
   validates :start_time,  :presence => true,
                           :timeliness => { :before => :end_time, :if => :has_end_time? }
                           
   validate :no_shifts_inprogress, :not_during_a_shift
+  
+  def self.between(one, two)
+    where("shifts.start_time >= ? AND shifts.end_time <= ?", one, two)
+  end
   
   def update_activities
     update_activity_count

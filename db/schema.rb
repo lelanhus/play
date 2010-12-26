@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101225024951) do
+ActiveRecord::Schema.define(:version => 20101226013608) do
 
   create_table "activities", :force => true do |t|
     t.datetime "start_time"
@@ -30,6 +30,19 @@ ActiveRecord::Schema.define(:version => 20101225024951) do
     t.float    "total_hours",        :default => 0.0
     t.integer  "nonpaid_activities", :default => 0
     t.integer  "paid_activities",    :default => 0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "timesheet_id"
+  end
+
+  create_table "timesheets", :force => true do |t|
+    t.date     "start_date"
+    t.date     "end_date"
+    t.float    "paid_hours"
+    t.float    "nonpaid_hours"
+    t.integer  "total_hours"
+    t.integer  "paid_activities"
+    t.integer  "nonpaid_activities"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

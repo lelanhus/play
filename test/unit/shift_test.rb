@@ -90,4 +90,28 @@ class ShiftTest < ActiveSupport::TestCase
     assert_equal shift.total_hours, 34.0
     
   end
+
+  test "scope between returns all shifts between two dates" do
+    shift1 = Factory(:shift)
+    shift2 = Factory(:shift)
+    shift3 = Factory(:shift)
+    
+    shift2.start_time = shift2.start_time + 2.years
+    shift2.end_time = shift2.end_time + 2.years
+    shift2.save
+    
+    shift3.start_time = shift3.start_time + 2.weeks
+    shift3.end_time = shift3.end_time + 2.weeks
+    shift3.save
+    
+    time1 = Time.now - 1.week
+    time2 = Time.now + 1.day
+    assert_equal Shift.between(time1, time2).count, 1
+    
+    time2 = Time.now + 3.weeks
+    assert_equal Shift.between(time1, time2).count, 2
+    
+    time2 = Time.now + 3.years
+    assert_equal Shift.between(time1, time2).count, 3
+  end
 end
