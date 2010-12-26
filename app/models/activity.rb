@@ -15,7 +15,7 @@ class Activity < ActiveRecord::Base
                                         }
   
   validates :end_time, :timeliness => {
-                                      :before => :shift_end, :if => :has_end_time?
+                                      :before => :shift_end, :if => :shift_complete?
                                       }
                                       
   validates :end_time, :presence => true, :if => :shift_complete?
@@ -47,7 +47,7 @@ class Activity < ActiveRecord::Base
   end
   
   def current_activities?
-    !self.shift.activities.incomplete.blank?
+    !self.shift.activities.incomplete.empty?
   end
   
   private
@@ -75,17 +75,16 @@ class Activity < ActiveRecord::Base
   end
   
   def proper_shift
-    inprogress_activities
+    return inprogress_activities if current_activities?
     not_between_others
   end
   
   def inprogress_activities
-    errors.add(:start_time, "can't happen when there are activities in progress.") if
-      current_activities?
+    errors.add(:start_time, "can't happen when there are activities in progress.")
   end
   
   def not_between_others
-    all_activities = self.shift.activities
+    all_activities = self.shift.activities.complete
     all_activities.delete(self)
     all_activities.each do |act|
       errors.add(:start_time, "can't be during another activity.") if
@@ -103,7 +102,6 @@ class Activity < ActiveRecord::Base
   end
   
   def compare_end(time, the_end = false)
-    return false if time.nil?
     return self.start_time < time unless the_end == true
     self.end_time < time
   end

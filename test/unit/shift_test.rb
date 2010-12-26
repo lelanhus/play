@@ -30,12 +30,43 @@ class ShiftTest < ActiveSupport::TestCase
     assert_equal act.has_end_time?, true
   end
   
+  test "complete scope returns complete activities" do
+    3.times do
+      Factory(:shift)
+    end
+    Factory(:shift, :end_time => nil)
+    assert_equal Shift.complete.length, 3
+  end
+  
+  test "incomplete scope returns incomplete activities" do
+    3.times do
+      Factory(:shift)
+    end
+    Factory(:shift, :end_time => nil)
+    assert_equal Shift.incomplete.length, 1
+  end
+  
   test "shift should not start if there are incomplete shifts" do
+    Factory(:shift, :end_time => nil)
+    assert !Factory.build(:shift).valid?
     
+    Shift.destroy_all
+    Factory(:shift)
+    assert Factory.build(:shift).valid?
   end
   
   test "shift should not occur during another shift" do
+    shift = Factory(:shift)
+    s = Factory.build(:shift)
+    s.start_time = shift.start_time + 10
+    assert !s.valid?
     
+    s.start_time = shift.start_time - 100
+    s.end_time = shift.end_time - 100
+    assert !s.valid?
+    
+    s.end_time = shift.start_time - 10
+    assert s.valid?
   end
   
   

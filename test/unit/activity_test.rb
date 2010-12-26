@@ -129,9 +129,11 @@ class ActivityTest < ActiveSupport::TestCase
     act2.start_time = Time.now
     assert !act2.valid?
     
-    act1.end_time = Time.now
-    act1.save
-    act2.start_time = Time.now + 10
+    Shift.destroy_all
+    Activity.destroy_all
+    act1 = Factory(:activity, :shift => Factory(:shift, :end_time => nil))
+    act2 = act1.shift.activities.build
+    act2.start_time = act1.end_time + 1
     assert act2.valid?
   end
 
