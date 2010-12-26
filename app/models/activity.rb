@@ -24,7 +24,7 @@ class Activity < ActiveRecord::Base
 
   before_validation :set_total_time, :if => :needs_total_time?
   
-  after_save :update_shift
+  after_save :update_shift, :if => Proc.new { |n| n.changed? }
   after_save :calculate_total_time, :if => :has_end_time?
   
   def shift_complete?

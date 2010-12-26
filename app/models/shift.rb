@@ -2,6 +2,8 @@ class Shift < ActiveRecord::Base
   
   has_many :activities
   
+  belongs_to :timesheet
+  
   scope :complete, where("shifts.end_time IS NOT null")
   scope :incomplete, where("shifts.end_time IS null")
   
@@ -11,7 +13,14 @@ class Shift < ActiveRecord::Base
   validate :no_shifts_inprogress, :not_during_a_shift
   
   def self.between(one, two)
-    where("shifts.start_time >= ? AND shifts.end_time <= ?", one, two)
+    where("shifts.start_time >= ? AND shifts.start_time <= ?", one, two)
+  end
+  
+  def self.add_timesheet(timesheet)
+    shifts = Shift.between(timesheet.start_date, timesheet.end_date)
+    shifts.each do |s|
+      s.update_attributes(:timesheet_id => timesheet.id)
+    end
   end
   
   def update_activities
@@ -36,27 +45,9 @@ class Shift < ActiveRecord::Base
   end
   
   def update_activity_hours
-    update_paid_hours
-    update_nonpaid_hours
-    update_total_hours
-  end
-  
-  def update_paid_hours
-    self.paid_hours = 0.0
-    self.activities.paid.complete.each do |act|
-      self.paid_hours += act.total_time
-    end
-  end
-  
-  def update_nonpaid_hours
-    self.nonpaid_hours = 0.0
-    self.activities.nonpaid.complete.each do |act|
-      self.nonpaid_hours += act.total_time
-    end
-  end
-  
-  def update_total_hours
-    self.total_hours = 0.0
+    acts = self.activities.complete
+    self.paid_hours = acts.paid.sum(:total_time)
+    self.nonpaid_hours = acts.nonpaid.sum(:total_time)
     self.total_hours = self.paid_hours + self.nonpaid_hours
   end
   

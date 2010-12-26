@@ -114,4 +114,21 @@ class ShiftTest < ActiveSupport::TestCase
     time2 = Time.now + 3.years
     assert_equal Shift.between(time1, time2).count, 3
   end
+
+  test "self.add_timesheet should add a timesheet to all shifts within date range" do
+    3.times do
+      Factory(:shift)
+    end
+    f = Shift.last
+    f.start_time = f.start_time + 1.year
+    f.end_time = f.end_time + 1.year
+    f.save
+    
+    time_start = Time.now - 1.week
+    time_end = Time.now + 6.months
+    
+    t = Factory(:timesheet, :start_date => time_start, :end_date => time_end)
+    Shift.add_timesheet(t)
+    assert_equal t.shifts.count, 2
+  end
 end
